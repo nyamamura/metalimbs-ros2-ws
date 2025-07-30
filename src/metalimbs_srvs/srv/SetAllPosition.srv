@@ -1,0 +1,4 @@
+float64[] angles  # radian
+---
+bool success
+string message

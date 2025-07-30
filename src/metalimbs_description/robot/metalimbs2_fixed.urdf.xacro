@@ -1,0 +1,403 @@
+<?xml version="1.0"?>
+
+<robot name="metalimbs" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="PI" value="3.14159265358979"/>
+  <xacro:property name="PI_2" value="1.5707963267948966"/>
+  <xacro:property name="ToRad" value="${PI/180}"/>
+  <xacro:property name="mesh_rpy" value="${PI_2} ${PI} -${PI_2}"/>
+  
+  <xacro:macro name="position_control_transmission" params="basename">
+    <transmission name="${basename}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${basename}_joint">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${basename}_motor"></actuator>
+    </transmission>
+  </xacro:macro>
+
+  <!-- base link with proper inertia -->
+  <link name="base_link">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- base mount -->
+  <link name="base_mount">
+    <inertial>
+      <mass value="8.0" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="${mesh_rpy}"/>
+      <geometry>
+        <mesh filename="package://metalimbs_description/meshes/metalimbs2/base_mount.obj"
+              scale="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${mesh_rpy}"/>
+      <geometry>
+        <mesh filename="package://metalimbs_description/meshes/metalimbs2/base_mount.obj"
+              scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="base_mount" />
+  </joint>
+
+  <!-- shoulder1 link -->
+  <xacro:macro name="shoulder1" params="position sign">
+    <link name="${position}_shoulder1_link">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0.1925 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder1.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0.1925 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder1.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder1_joint" type="fixed">
+      <parent link="base_mount" />
+      <child link="${position}_shoulder1_link" />
+      <origin 
+        xyz="0 ${-sign * 0.1925} 0"
+        rpy="0 0 0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:shoulder1 position="left" sign="1" />
+  <xacro:shoulder1 position="right" sign="-1" />
+
+  <!-- shoulder2 mount -->
+  <xacro:macro name="shoulder2_mount" params="position sign">
+    <link name="${position}_shoulder2_mount">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.1925} 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder2_mount_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.1925} 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder2_mount_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder2_mount_joint" type="revolute">
+      <parent link="${position}_shoulder1_link" />
+      <child link="${position}_shoulder2_mount" />
+      <origin 
+        xyz="-0.0775 0 0"
+        rpy="0 0 0" />
+      <axis xyz="0 1 0" />
+      <limit lower="${-65 * ToRad}" upper="${125 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+
+    <xacro:position_control_transmission basename="${position}_shoulder2_mount" />
+  </xacro:macro>
+
+  <xacro:shoulder2_mount position="left" sign="1"/>
+  <xacro:shoulder2_mount position="right" sign="-1" />
+
+  <!-- shoulder2 link -->
+  <xacro:macro name="shoulder2" params="position sign">
+    <link name="${position}_shoulder2_link">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder2_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} 0" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/shoulder2_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder2_joint" type="revolute">
+      <parent link="${position}_shoulder2_mount" />
+      <child link="${position}_shoulder2_link" />
+      <origin 
+        xyz="0 ${-sign * (0.3085 - 0.1925)} 0"
+        rpy="0 0 0" />
+      <axis xyz="${-sign} 0 0" />
+      <limit lower="${-115 * ToRad}" upper="${15 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+
+    <xacro:position_control_transmission basename="${position}_shoulder2" />
+  </xacro:macro>
+
+  <xacro:shoulder2 position="left" sign="1" />
+  <xacro:shoulder2 position="right" sign="-1" />
+
+  <!-- upper arm -->
+  <xacro:macro name="upper_arm" params="position sign">
+    <link name="${position}_upper_arm">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.05" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/upper_arm_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.05" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/upper_arm_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_upper_arm_joint" type="revolute">
+      <parent link="${position}_shoulder2_link" />
+      <child link="${position}_upper_arm" />
+      <origin 
+        xyz="0 0 0.05"
+        rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="${-95 * ToRad}" upper="${95 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+    
+    <xacro:position_control_transmission basename="${position}_upper_arm" />
+  </xacro:macro>
+
+  <xacro:upper_arm position="left" sign="1" />
+  <xacro:upper_arm position="right" sign="-1" />
+
+  <!-- elbow -->
+  <xacro:macro name="elbow" params="position sign">
+    <link name="${position}_elbow">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.3" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/elbow_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.3" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/elbow_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_elbow_joint" type="revolute">
+      <parent link="${position}_upper_arm" />
+      <child link="${position}_elbow" />
+      <origin 
+        xyz="0 0 ${0.3 - 0.05}"
+        rpy="0 0 0" />
+      <axis xyz="0 1 0" />
+      <limit lower="${-35 * ToRad}" upper="${125 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+
+    <xacro:position_control_transmission basename="${position}_elbow" />
+  </xacro:macro>
+
+  <xacro:elbow position="left" sign="1" />
+  <xacro:elbow position="right" sign="-1" />
+
+  <!-- forearm -->
+  <xacro:macro name="forearm" params="position sign">
+    <link name="${position}_forearm">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.352" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/forearm_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.352" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/forearm_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_forearm_joint" type="revolute">
+      <parent link="${position}_elbow" />
+      <child link="${position}_forearm" />
+      <origin 
+        xyz="0 0 ${0.352 - 0.3}"
+        rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="${-110 * ToRad}" upper="${110 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+    
+    <xacro:position_control_transmission basename="${position}_forearm" />
+  </xacro:macro>
+
+  <xacro:forearm position="left" sign="1" />
+  <xacro:forearm position="right" sign="-1" />
+
+  <!-- wrist -->
+  <xacro:macro name="wrist" params="position sign">
+    <link name="${position}_wrist">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/wrist_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/wrist_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_wrist_joint" type="revolute">
+      <parent link="${position}_forearm" />
+      <child link="${position}_wrist" />
+      <origin xyz="0 0 ${0.7 - 0.352}" rpy="0 0 0" />
+      <axis xyz="1 0 0" />
+      <limit lower="${-95 * ToRad}" upper="${95 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+
+    <xacro:position_control_transmission basename="${position}_wrist" />
+  </xacro:macro>
+
+  <xacro:wrist position="left" sign="1" />
+  <xacro:wrist position="right" sign="-1" />
+
+  <!-- handunit mount -->
+  <xacro:macro name="handunit_mount" params="position sign">
+    <link name="${position}_handunit_mount">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/handunit_mount_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/handunit_mount_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_handunit_mount_joint" type="revolute">
+      <parent link="${position}_wrist" />
+      <child link="${position}_handunit_mount" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="0 1 0" />
+      <limit lower="${-35 * ToRad}" upper="${35 * ToRad}" effort="100" velocity="1000" />
+    </joint>
+    
+    <xacro:position_control_transmission basename="${position}_handunit_mount" />
+  </xacro:macro>
+
+  <xacro:handunit_mount position="left" sign="1" />
+  <xacro:handunit_mount position="right" sign="-1" />
+
+  <!-- handunit -->
+  <xacro:macro name="handunit" params="position sign">
+    <link name="${position}_handunit">
+      <inertial>
+        <mass value="0.2" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7725" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/handunit_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0775 ${sign * 0.3085} -0.7725" rpy="${mesh_rpy}"/>
+        <geometry>
+          <mesh filename="package://metalimbs_description/meshes/metalimbs2/handunit_${position}.obj"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_handunit_joint" type="fixed">
+      <parent link="${position}_handunit_mount" />
+      <child link="${position}_handunit" />
+      <origin xyz="0 0 ${0.7725 - 0.7}" rpy="0 0 0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:handunit position="left" sign="1" />
+  <xacro:handunit position="right" sign="-1" />
+
+</robot>

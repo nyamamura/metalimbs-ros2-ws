@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  
+  <include file="$(find metalimbs_description)/launch/display_robot.launch">
+    <arg name="rvizconfig" value="$(find metalimbs_description)/rviz/urdf.rviz" />
+    <arg name="use_slider" value="false" />
+    <arg name="sim" value="true" />
+    <arg name="fixed" value="true" />
+    <arg name="model" value="$(find metalimbs_gazebo_bringup)/robot_setup/metalimbs_on_fixed_stage.xacro" />
+  </include>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model metalimbs" />
+
+  <node name="map_to_baselink_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 1 0 0 0 map base_footprint" />
+
+  <rosparam file="$(find metalimbs_description)/config/controller.yaml" command="load" />
+  <rosparam file="$(find metalimbs_gazebo_bringup)/config/dummy_pid.yaml" command="load" ns="metalimbs/gazebo_ros_control/pid_gains" />
+  <node name="controller_spawner" pkg="controller_manager"
+        type="spawner" respawn="false"
+        output="screen" ns="/metalimbs"
+        args="left_shoulder2_mount_joint_position_controller right_shoulder2_mount_joint_position_controller
+              left_shoulder2_joint_position_controller right_shoulder2_joint_position_controller
+              left_upper_arm_joint_position_controller right_upper_arm_joint_position_controller
+              left_elbow_joint_position_controller right_elbow_joint_position_controller 
+              left_forearm_joint_position_controller right_forearm_joint_position_controller 
+              left_wrist_joint_position_controller right_wrist_joint_position_controller
+              left_handunit_mount_joint_position_controller right_handunit_mount_joint_position_controller" />
+
+</launch>

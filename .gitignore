@@ -1,0 +1,31 @@
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# Large mesh files
+*.obj
+*.stl
+*.dae
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+
+# Backup files
+*.bak
+*.backup
+
+# System files
+Thumbs.db

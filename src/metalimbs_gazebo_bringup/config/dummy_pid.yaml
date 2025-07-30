@@ -1,0 +1,14 @@
+left_shoulder2_mount_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_shoulder2_mount_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_shoulder2_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_shoulder2_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_upper_arm_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_upper_arm_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_elbow_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_elbow_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_forearm_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_forearm_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_wrist_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_wrist_joint: {p: 100.0, i: 0.01, d: 10.0}
+left_handunit_mount_joint: {p: 100.0, i: 0.01, d: 10.0}
+right_handunit_mount_joint: {p: 100.0, i: 0.01, d: 10.0}

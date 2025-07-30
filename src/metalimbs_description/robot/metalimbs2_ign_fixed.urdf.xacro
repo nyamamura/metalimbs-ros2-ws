@@ -1,0 +1,572 @@
+<?xml version="1.0"?>
+<robot name="metalimbs" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Argument for mesh path -->
+  <xacro:arg name="mesh_path" default="package://metalimbs_description/meshes/metalimbs2"/>
+  <xacro:property name="mesh_path" value="$(arg mesh_path)"/>
+
+  <!-- base link with proper inertia -->
+  <link name="base_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- base mount -->
+  <link name="base_mount">
+    <inertial>
+      <mass value="8.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+      <geometry>
+        <mesh filename="${mesh_path}/base_mount.obj" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+      <geometry>
+        <mesh filename="${mesh_path}/base_mount.obj" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_mount_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_mount"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- shoulder1 -->
+  <xacro:macro name="shoulder1_link" params="position">
+    <link name="${position}_shoulder1_link">
+      <inertial>
+        <mass value="0.2"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder1.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder1.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder1_joint" type="fixed">
+      <parent link="base_mount"/>
+      <child link="${position}_shoulder1_link"/>
+      <xacro:if value="${position == 'left'}">
+        <origin xyz="0 0.1925 0" rpy="0 0 0"/>
+      </xacro:if>
+      <xacro:if value="${position == 'right'}">
+        <origin xyz="0 -0.1925 0" rpy="0 0 ${pi}"/>
+      </xacro:if>
+    </joint>
+  </xacro:macro>
+
+  <!-- shoulder2 mount -->
+  <xacro:macro name="shoulder2_mount" params="position">
+    <link name="${position}_shoulder2_mount">
+      <inertial>
+        <mass value="0.5"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder2_mount_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder2_mount_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder2_mount_joint" type="revolute">
+      <parent link="${position}_shoulder1_link"/>
+      <child link="${position}_shoulder2_mount"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.134" upper="2.182" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- shoulder2 -->
+  <xacro:macro name="shoulder2" params="position">
+    <link name="${position}_shoulder2_link">
+      <inertial>
+        <mass value="1.0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder2_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/shoulder2_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_shoulder2_joint" type="revolute">
+      <parent link="${position}_shoulder2_mount"/>
+      <child link="${position}_shoulder2_link"/>
+      <origin xyz="0 0 0" rpy="${pi/2} ${-pi/2} 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-2.007" upper="0.262" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- upper arm -->
+  <xacro:macro name="upper_arm" params="position">
+    <link name="${position}_upper_arm">
+      <inertial>
+        <mass value="0.8"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.004" ixy="0" ixz="0" iyy="0.004" iyz="0" izz="0.004"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/upper_arm_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/upper_arm_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_upper_arm_joint" type="revolute">
+      <parent link="${position}_shoulder2_link"/>
+      <child link="${position}_upper_arm"/>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.658" upper="1.658" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- elbow -->
+  <xacro:macro name="elbow" params="position">
+    <link name="${position}_elbow">
+      <inertial>
+        <mass value="0.6"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/elbow_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/elbow_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_elbow_joint" type="revolute">
+      <parent link="${position}_upper_arm"/>
+      <child link="${position}_elbow"/>
+      <origin xyz="0 -0.33 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-0.611" upper="2.182" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- forearm -->
+  <xacro:macro name="forearm" params="position">
+    <link name="${position}_forearm">
+      <inertial>
+        <mass value="0.4"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/forearm_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/forearm_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_forearm_joint" type="revolute">
+      <parent link="${position}_elbow"/>
+      <child link="${position}_forearm"/>
+      <origin xyz="0 0 0" rpy="${pi/2} ${pi/2} 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.92" upper="1.92" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- wrist -->
+  <xacro:macro name="wrist" params="position">
+    <link name="${position}_wrist">
+      <inertial>
+        <mass value="0.3"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/wrist_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/wrist_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_wrist_joint" type="revolute">
+      <parent link="${position}_forearm"/>
+      <child link="${position}_wrist"/>
+      <origin xyz="0 -0.3 0" rpy="${pi/2} ${-pi/2} 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.658" upper="1.658" effort="10.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- handunit mount -->
+  <xacro:macro name="handunit_mount" params="position">
+    <link name="${position}_handunit_mount">
+      <inertial>
+        <mass value="0.2"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/handunit_mount_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/handunit_mount_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_handunit_mount_joint" type="revolute">
+      <parent link="${position}_wrist"/>
+      <child link="${position}_handunit_mount"/>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-0.611" upper="0.611" effort="5.0" velocity="1.0"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- handunit -->
+  <xacro:macro name="handunit" params="position">
+    <link name="${position}_handunit">
+      <inertial>
+        <mass value="0.5"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/handunit_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi} ${-pi/2}"/>
+        <geometry>
+          <mesh filename="${mesh_path}/handunit_${position}.obj" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${position}_handunit_joint" type="fixed">
+      <parent link="${position}_handunit_mount"/>
+      <child link="${position}_handunit"/>
+      <origin xyz="0 -0.125 0" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Instantiate links for left arm -->
+  <xacro:shoulder1_link position="left"/>
+  <xacro:shoulder2_mount position="left"/>
+  <xacro:shoulder2 position="left"/>
+  <xacro:upper_arm position="left"/>
+  <xacro:elbow position="left"/>
+  <xacro:forearm position="left"/>
+  <xacro:wrist position="left"/>
+  <xacro:handunit_mount position="left"/>
+  <xacro:handunit position="left"/>
+
+  <!-- Instantiate links for right arm -->
+  <xacro:shoulder1_link position="right"/>
+  <xacro:shoulder2_mount position="right"/>
+  <xacro:shoulder2 position="right"/>
+  <xacro:upper_arm position="right"/>
+  <xacro:elbow position="right"/>
+  <xacro:forearm position="right"/>
+  <xacro:wrist position="right"/>
+  <xacro:handunit_mount position="right"/>
+  <xacro:handunit position="right"/>
+
+  <!-- Gazebo specific elements -->
+  
+  <!-- Gazebo colors and physics properties -->
+  <gazebo reference="base_mount">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <xacro:macro name="gazebo_link_properties" params="link_name">
+    <gazebo reference="${link_name}">
+      <material>Gazebo/DarkGrey</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Apply properties to all links -->
+  <xacro:gazebo_link_properties link_name="left_shoulder1_link"/>
+  <xacro:gazebo_link_properties link_name="right_shoulder1_link"/>
+  <xacro:gazebo_link_properties link_name="left_shoulder2_mount"/>
+  <xacro:gazebo_link_properties link_name="right_shoulder2_mount"/>
+  <xacro:gazebo_link_properties link_name="left_shoulder2_link"/>
+  <xacro:gazebo_link_properties link_name="right_shoulder2_link"/>
+  <xacro:gazebo_link_properties link_name="left_upper_arm"/>
+  <xacro:gazebo_link_properties link_name="right_upper_arm"/>
+  <xacro:gazebo_link_properties link_name="left_elbow"/>
+  <xacro:gazebo_link_properties link_name="right_elbow"/>
+  <xacro:gazebo_link_properties link_name="left_forearm"/>
+  <xacro:gazebo_link_properties link_name="right_forearm"/>
+  <xacro:gazebo_link_properties link_name="left_wrist"/>
+  <xacro:gazebo_link_properties link_name="right_wrist"/>
+  <xacro:gazebo_link_properties link_name="left_handunit_mount"/>
+  <xacro:gazebo_link_properties link_name="right_handunit_mount"/>
+  <xacro:gazebo_link_properties link_name="left_handunit"/>
+  <xacro:gazebo_link_properties link_name="right_handunit"/>
+
+  <!-- Add the ros2_control Gazebo plugin -->
+  <gazebo>
+    <plugin filename="ign_ros2_control-system" name="ign_ros2_control">
+      <parameters>$(find metalimbs_description)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+  <!-- ros2_control hardware interface -->
+  <ros2_control name="IgnitionSystem" type="system">
+    <hardware>
+      <plugin>ign_ros2_control/IgnitionSystem</plugin>
+    </hardware>
+    
+    <!-- Left arm joints -->
+    <joint name="left_shoulder2_mount_joint">
+      <command_interface name="position">
+        <param name="min">-1.134</param>
+        <param name="max">2.182</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_shoulder2_joint">
+      <command_interface name="position">
+        <param name="min">-2.007</param>
+        <param name="max">0.262</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_upper_arm_joint">
+      <command_interface name="position">
+        <param name="min">-1.658</param>
+        <param name="max">1.658</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_elbow_joint">
+      <command_interface name="position">
+        <param name="min">-0.611</param>
+        <param name="max">2.182</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_forearm_joint">
+      <command_interface name="position">
+        <param name="min">-1.92</param>
+        <param name="max">1.92</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_wrist_joint">
+      <command_interface name="position">
+        <param name="min">-1.658</param>
+        <param name="max">1.658</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="left_handunit_mount_joint">
+      <command_interface name="position">
+        <param name="min">-0.611</param>
+        <param name="max">0.611</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Right arm joints -->
+    <joint name="right_shoulder2_mount_joint">
+      <command_interface name="position">
+        <param name="min">-1.134</param>
+        <param name="max">2.182</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_shoulder2_joint">
+      <command_interface name="position">
+        <param name="min">-2.007</param>
+        <param name="max">0.262</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_upper_arm_joint">
+      <command_interface name="position">
+        <param name="min">-1.658</param>
+        <param name="max">1.658</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_elbow_joint">
+      <command_interface name="position">
+        <param name="min">-0.611</param>
+        <param name="max">2.182</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_forearm_joint">
+      <command_interface name="position">
+        <param name="min">-1.92</param>
+        <param name="max">1.92</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_wrist_joint">
+      <command_interface name="position">
+        <param name="min">-1.658</param>
+        <param name="max">1.658</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="right_handunit_mount_joint">
+      <command_interface name="position">
+        <param name="min">-0.611</param>
+        <param name="max">0.611</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+</robot>

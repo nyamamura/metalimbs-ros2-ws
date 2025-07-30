@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <node ns="left" name="matalimbs_hardware_node" pkg="matalimbs_hardware" type="arm_control_service_node" output="screen">
+    <param name="port" value="/dev/ttyUSB0" />
+  </node>
+
+  <node ns="right" name="matalimbs_hardware_node" pkg="matalimbs_hardware" type="arm_control_service_node" output="screen">
+    <param name="port" value="/dev/ttyUSB1" />
+  </node>
+
+</launch>

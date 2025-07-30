@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+
+<robot name="metalimbs" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="PI" value="3.14159265358979"/>
+  <xacro:property name="PI_2" value="1.5707963267948966"/>
+  <xacro:property name="ToRad" value="${PI/180}"/>
+  <xacro:property name="mesh_rpy" value="${PI_2} ${PI} -${PI_2}"/>
+  <xacro:property name="mesh_path" value="file:///media/nyamamura/Windows/Users/allex/source/repos/metalimbs-ros2-ws/src/metalimbs_description/meshes/metalimbs2"/>
+  
+  <xacro:macro name="position_control_transmission" params="basename">
+    <transmission name="${basename}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${basename}_joint">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${basename}_motor"></actuator>
+    </transmission>
+  </xacro:macro>
+
+  <!-- base link -->
+  <link name="base_link" />
+
+  <!-- base mount -->
+  <link name="base_mount">
+    <inertial>
+      <mass value="8.0" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="${mesh_rpy}"/>
+      <geometry>
+        <mesh filename="${mesh_path}/base_mount.obj"
+              scale="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${mesh_rpy}"/>
+      <geometry>
+        <mesh filename="${mesh_path}/base_mount.obj"
+              scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="base_mount" />
+  </joint>
+
+</robot>

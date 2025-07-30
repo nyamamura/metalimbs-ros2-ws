@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>metalimbs_moveit_config</name>
+  <version>0.3.0</version>
+  <description>
+     An automatically generated package with all the configuration and launch files for using the metalimbs with the MoveIt Motion Planning Framework
+  </description>
+  <author email="watanabe@start.rcast.u-tokyo.ac.jp">Watanabe Takafumi</author>
+  <maintainer email="watanabe@start.rcast.u-tokyo.ac.jp">Watanabe Takafumi</maintainer>
+  <license>BSD</license>
+  <url type="website">http://moveit.ros.org/</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit</url>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>moveit_fake_controller_manager</exec_depend>
+  <exec_depend>moveit_kinematics</exec_depend>
+  <exec_depend>moveit_planners_ompl</exec_depend>
+  <exec_depend>moveit_ros_visualization</exec_depend>
+  <exec_depend>moveit_setup_assistant</exec_depend>
+  <exec_depend>moveit_simple_controller_manager</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend> 
+  <exec_depend>gazebo_ros2_control</exec_depend> 
+  <exec_depend>metalimbs_description</exec_depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

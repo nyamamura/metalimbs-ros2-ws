@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.5)
+project(metalimbs_gazebo_bringup)
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+# Install config files
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
+
+# Install robot files
+install(DIRECTORY robot/
+  DESTINATION share/${PROJECT_NAME}/robot
+)
+
+# Install robot_setup files
+install(DIRECTORY robot_setup/
+  DESTINATION share/${PROJECT_NAME}/robot_setup
+)
+
+ament_package()

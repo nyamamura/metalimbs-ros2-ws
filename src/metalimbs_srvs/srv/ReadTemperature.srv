@@ -1,0 +1,5 @@
+int16 motor_id
+---
+int32 temperature
+bool success
+string message

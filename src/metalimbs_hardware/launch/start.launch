@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <include file="$(find metalimbs_description)/launch/display_robot.launch">
+    <arg name="model" value="$(find metalimbs_description)/robot/metalimbs2.urdf.xacro" />
+    <arg name="rvizconfig" value="$(find metalimbs_description)/rviz/urdf.rviz" />
+    <arg name="use_slider" value="false"/>
+    <arg name="sim" value="false"/>
+  </include>
+
+  <node name="matalimbs_hardware_node" pkg="matalimbs_hardware" type="matalimbs_hardware_node" output="screen" />
+
+</launch>

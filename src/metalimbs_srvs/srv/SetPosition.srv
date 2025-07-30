@@ -1,0 +1,5 @@
+int16 motor_id
+float64 angle  # radian
+---
+bool success
+string message
